@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовый апплет WebBridge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        main {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #4b6cb7;
+        }
+        
+        h2 {
+            color: #182848;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 span {
+            font-size: 1.5rem;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #4b6cb7;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .button:hover {
+            background: #182848;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button.secondary {
+            background: #6c757d;
+        }
+        
+        .button.success {
+            background: #28a745;
+        }
+        
+        .button.warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            border-top: 3px solid #4b6cb7;
+        }
+        
+        .card h3 {
+            margin-bottom: 10px;
+            color: #182848;
+        }
+        
+        .card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4b6cb7;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .api-info {
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="icon">🧪</div>
+            <h1>Тестовый апплет WebBridge</h1>
+            <p class="subtitle">Простейший пример апплета для демонстрации работы системы</p>
+        </header>
+        
+        <main>
+            <div class="section">
+                <h2><span>📡</span> Подключение к API</h2>
+                <p>Этот апплет демонстрирует работу с Zim WebBridge API. Нажмите кнопки ниже для тестирования различных функций.</p>
+                
+                <div class="grid">
+                    <button class="button" onclick="testConnection()">Проверить подключение</button>
+                    <button class="button secondary" onclick="getNotebookInfo()">Получить информацию о блокноте</button>
+                    <button class="button success" onclick="listPages()">Список страниц</button>
+                    <button class="button warning" onclick="getCurrentPage()">Текущая страница</button>
+                </div>
+                
+                <div id="connection-status" class="status">
+                    Статус: готов к работе. Нажмите кнопку для тестирования.
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><span>📊</span> Информация о блокноте</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Имя блокнота</h3>
+                        <div class="value" id="notebook-name">—</div>
+                    </div>
+                    <div class="card">
+                        <h3>Всего страниц</h3>
+                        <div class="value" id="total-pages">—</div>
+                    </div>
+                    <div class="card">
+                        <h3>Тегов</h3>
+                        <div class="value" id="total-tags">—</div>
+                    </div>
+                    <div class="card">
+                        <h3>Статус</h3>
+                        <div class="value" id="notebook-status">—</div>
+                    </div>
+                </div>
+                
+                <div id="notebook-info" class="status">
+                    Информация о блокноте будет отображена здесь.
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><span>📝</span> Работа с текущей страницей</h2>
+                <p>Тестирование работы с текущей открытой страницей в Zim.</p>
+                
+                <div class="grid">
+                    <button class="button" onclick="createTestPage()">Создать тестовую страницу</button>
+                    <button class="button secondary" onclick="appendToPage()">Добавить текст на страницу</button>
+                    <button class="button warning" onclick="getPageTags()">Получить теги страницы</button>
+                </div>
+                
+                <div id="page-actions" class="status">
+                    Действия с текущей страницей будут отображены здесь.
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Тестовый апплет для WebBridge • Версия 1.0.0</p>
+            <p class="api-info">API: <span id="api-version">—</span> • Сервер: <span id="server-status">не подключен</span></p>
+        </footer>
+    </div>
+    
+    <script>
+        // Базовый URL для API
+        const API_BASE = '/api';
+        
+        // Элементы DOM
+        const connectionStatus = document.getElementById('connection-status');
+        const notebookInfo = document.getElementById('notebook-info');
+        const pageActions = document.getElementById('page-actions');
+        const notebookName = document.getElementById('notebook-name');
+        const totalPages = document.getElementById('total-pages');
+        const totalTags = document.getElementById('total-tags');
+        const notebookStatus = document.getElementById('notebook-status');
+        const apiVersion = document.getElementById('api-version');
+        const serverStatus = document.getElementById('server-status');
+        
+        // Функция для отображения статуса
+        function showStatus(element, message, type = 'info') {
+            element.textContent = message;
+            element.className = 'status';
+            if (type === 'success') {
+                element.classList.add('success');
+            } else if (type === 'error') {
+                element.classList.add('error');
+            }
+            
+            // Автоматически скрывать успешные сообщения через 5 секунд
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (element.classList.contains('success')) {
+                        element.textContent = 'Готов к работе';
+                        element.className = 'status';
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Функция для выполнения запросов к API
+        async function apiCall(endpoint, options = {}) {
+            const url = API_BASE + endpoint;
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            try {
+                const response = await fetch(url, { ...defaultOptions, ...options });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // 1. Тестирование подключения
+        async function testConnection() {
+            showStatus(connectionStatus, 'Проверка подключения к серверу...', 'info');
+            
+            try {
+                const data = await apiCall('/');
+                showStatus(connectionStatus, '✅ Сервер работает! Подключение успешно.', 'success');
+                serverStatus.textContent = 'работает';
+                return true;
+            } catch (error) {
+                showStatus(connectionStatus, `❌ Ошибка подключения: ${error.message}`, 'error');
+                serverStatus.textContent = 'ошибка';
+                return false;
+            }
+        }
+        
+        // 2. Получение информации о блокноте
+        async function getNotebookInfo() {
+            showStatus(notebookInfo, 'Получение информации о блокноте...', 'info');
+            
+            try {
+                const data = await apiCall('/notebook');
+                
+                notebookName.textContent = data.name || '—';
+                totalPages.textContent = data.page_count || 0;
+                totalTags.textContent = data.tag_count || 0;
+                notebookStatus.textContent = data.readonly ? 'только чтение' : 'чтение/запись';
+                apiVersion.textContent = data.api_version || '—';
+                
+                const infoText = `Блокнот: ${data.name}\n` +
+                               `Описание: ${data.description || 'нет'}\n` +
+                               `Всего страниц: ${data.page_count}\n` +
+                               `Всего тегов: ${data.tag_count}\n` +
+                               `Режим: ${data.readonly ? 'только чтение' : 'чтение/запись'}`;
+                
+                showStatus(notebookInfo, infoText, 'success');
+                return data;
+            } catch (error) {
+                showStatus(notebookInfo, `❌ Ошибка: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        // 3. Получение списка страниц
+        async function listPages() {
+            showStatus(notebookInfo, 'Получение списка страниц...', 'info');
+            
+            try {
+                const data = await apiCall('/pages?limit=10');
+                const pages = data.pages || [];
+                
+                if (pages.length === 0) {
+                    showStatus(notebookInfo, 'В блокноте нет страниц.', 'info');
+                    return;
+                }
+                
+                let pagesText = `Найдено страниц: ${pages.length}\n\n`;
+                pages.forEach((page, index) => {
+                    pagesText += `${index + 1}. ${page.name}\n`;
+                });
+                
+                showStatus(notebookInfo, pagesText, 'success');
+                totalPages.textContent = pages.length;
+            } catch (error) {
+                showStatus(notebookInfo, `❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        // 4. Получение текущей страницы
+        async function getCurrentPage() {
+            showStatus(pageActions, 'Получение текущей страницы...', 'info');
+            
+            try {
+                const data = await apiCall('/current');
+                
+                if (data.page) {
+                    const pageText = `Текущая страница: ${data.page}\n` +
+                                   `Название: ${data.title || 'нет'}\n` +
+                                   `Время изменения: ${data.modified || 'неизвестно'}`;
+                    
+                    showStatus(pageActions, pageText, 'success');
+                } else {
+                    showStatus(pageActions, 'Текущая страница не определена', 'info');
+                }
+            } catch (error) {
+                showStatus(pageActions, `❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        // 5. Создание тестовой страницы
+        async function createTestPage() {
+            showStatus(pageActions, 'Создание тестовой страницы...', 'info');
+            
+            const pageName = `TestPage_${Date.now()}`;
+            const content = `# Тестовая страница\n\nСоздана тестовым апплетом WebBridge.\n\nВремя создания: ${new Date().toLocaleString()}\n\nЭто демонстрация работы API.`;
+            
+            try {
+                await apiCall(`/page/${pageName}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        content: content,
+                        format: 'wiki'
+                    })
+                });
+                
+                showStatus(pageActions, `✅ Страница "${pageName}" успешно создана!`, 'success');
+            } catch (error) {
+                showStatus(pageActions, `❌ Ошибка создания страницы: ${error.message}`, 'error');
+            }
+        }
+        
+        // 6. Добавление текста на текущую страницу
+        async function appendToPage() {
+            showStatus(pageActions, 'Получение текущей страницы для добавления текста...', 'info');
+            
+            try {
+                const current = await apiCall('/current');
+                
+                if (!current.page) {
+                    showStatus(pageActions, '❌ Текущая страница не определена', 'error');
+                    return;
+                }
+                
+                const appendText = `\n\n---\n*Добавлено тестовым апплетом: ${new Date().toLocaleString()}*`;
+                
+                await apiCall(`/page/${current.page}/append`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        content: appendText,
+                        format: 'wiki'
+                    })
+                });
+                
+                showStatus(pageActions, `✅ Текст добавлен на страницу "${current.page}"`, 'success');
+            } catch (error) {
+                showStatus(pageActions, `❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        // 7. Получение тегов страницы
+        async function getPageTags() {
+            showStatus(pageActions, 'Получение тегов текущей страницы...', 'info');
+            
+            try {
+                const current = await apiCall('/current');
+                
+                if (!current.page) {
+                    showStatus(pageActions, '❌ Текущая страница не определена', 'error');
+                    return;
+                }
+                
+                const tagsData = await apiCall(`/page/${current.page}/tags`);
+                const tags = tagsData.tags || [];
+                
+                if (tags.length === 0) {
+                    showStatus(pageActions, `Страница "${current.page}" не имеет тегов`, 'info');
+                } else {
+                    showStatus(pageActions, `Теги страницы "${current.page}": ${tags.join(', ')}`, 'success');
+                }
+            } catch (error) {
+                showStatus(pageActions, `❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Автоматически проверяем подключение при загрузке
+            const connected = await testConnection();
+            
+            if (connected) {
+                // Если подключение есть, получаем информацию о блокноте
+                setTimeout(getNotebookInfo, 500);
+            }
+        });
+    </script>
+</body>
+</html>
